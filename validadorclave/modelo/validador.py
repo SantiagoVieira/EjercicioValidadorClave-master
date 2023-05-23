@@ -1,62 +1,65 @@
 # TODO: Implementa el código del ejercicio aquí
 # NO ESTA COMPLETO, FALTA MAS IMPLEMENTACION Y CORRECCIONES
 from abc import ABC, abstractmethod
+import errors
 
 class ValidationRule(ABC):
-    def _init_(self, expected_length):
+    def __init__(self, expected_length):
         self._expected_length = expected_length
 
-    def _validate_length(self, password):
-        if len(password) <= self._expected_length:
-            raise InvalidLengthError()
+    def _validate_length(self, key):
+        if len(key) <= self._expected_length:
+            raise errors.MinLengthNotMetError()
 
-    def _contains_uppercase(self, password):
-        if not any(char.isupper() for char in password):
-            raise MissingUppercaseError()
+    def _contains_uppercase(self, key):
+        if not any(c.isupper() for c in key):
+            raise errors.NoUppercaseLetterError()
 
-    def _contains_lowercase(self, password):
-        if not any(char.islower() for char in password):
-            raise MissingLowercaseError()
+    def _contains_lowercase(self, key):
+        if not any(c.islower() for c in key):
+            raise errors.NoLowercaseLetterError()
 
-    def _contains_number(self, password):
-        if not any(char.isdigit() for char in password):
-            raise MissingNumberError()
+    def _contains_digit(self, key):
+        if not any(c.isdigit() for c in key):
+            raise errors.NoNumberError()
 
     @abstractmethod
-    def is_valid(self, password):
+    def is_valid(self, key):
         pass
 
 
-class GanimedesValidationRule(ValidationRule):
-    def contains_special_character(self, password):
+class GanymedeValidationRule(ValidationRule):
+    def _contains_special_character(self, key):
         special_characters = ['@', '_', '#', '$', '%']
-        if not any(char in special_characters for char in password):
-            raise MissingSpecialCharacterError()
+        if not any(c in special_characters for c in key):
+            raise errors.NoSpecialCharacterError()
 
-    def is_valid(self, password):
-        self._validate_length(password)
-        self._contains_uppercase(password)
-        self._contains_lowercase(password)
-        self._contains_number(password)
-        self.contains_special_character(password)
+    def is_valid(self, key):
+        self._validate_length(key)
+        self._contains_uppercase(key)
+        self._contains_lowercase(key)
+        self._contains_digit(key)
+        self._contains_special_character(key)
         return True
 
 
-class CalistoValidationRule(ValidationRule):
-    def contains_calisto(self, password):
-        if password.find('calisto') == -1:
-            raise InvalidCalistoError()
+class CallistoValidationRule(ValidationRule):
+    def _contains_callisto(self, key):
+        if key.find('callisto') == -1:
+            raise errors.NoSecretWordError()
 
-    def is_valid(self, password):
-        self._validate_length(password)
-        self._contains_number(password)
-        self.contains_calisto(password)
+    def is_valid(self, key):
+        self._validate_length(key)
+        self._contains_digit(key)
+        self._contains_callisto(key)
         return True
 
 
 class Validator:
-    def _init_(self, rule):
+    def __init__(self, rule):
         self.rule = rule
 
-    def is_valid(self, password):
-        return self.rule.is_valid(password)
+    def is_valid(self, key):
+        return self.rule.is_valid(key)
+
+
